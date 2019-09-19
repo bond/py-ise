@@ -29,9 +29,9 @@ class API:
 
   def __init__(self, hostname=None, user=None, password=None, debug=False, port=9060, cabundle='/etc/pki/tls/certs/ca-bundle.crt'):
 
-    if not hostname: raise ArgumentError('hostname must be provided as argument')
-    if not user: raise ArgumentError('user must be provided as argument')
-    if not password: raise ArgumentError('password must be providided as argument')
+    if not hostname: raise ValueError('hostname must be provided as argument')
+    if not user: raise ValueError('user must be provided as argument')
+    if not password: raise ValueError('password must be providided as argument')
 
     self.hostname = hostname
     self.user = user
@@ -69,7 +69,7 @@ class API:
       raise ISEError("Ise returned {0} for resource: {1}".format(resp.status_code, uri))
 
   def get_resource(self, uri):
-    return json.loads(self.get(uri).content)['NetworkDevice']
+    return json.loads(self.get(uri).content)
 
   def get_all_resources(self, uri, filter=None):
 
@@ -95,7 +95,7 @@ class API:
   def networkdevice(self, uuid):
     return self.get_resource(self.uri_for_path('/config/networkdevice/{}'.format(uuid)))
 
-  def networkgroups(self, filter=None):
+  def networkdevicegroups(self, filter=None):
     return self.get_all_resources(self.uri_for_path('/config/networkdevicegroup', size=self.API_MAX_SIZE))
 
   def networkdevices(self, filter=None):

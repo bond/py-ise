@@ -21,5 +21,6 @@ setuptools.setup(
     ],
     python_requires='>=3.4',
     py_modules=['ise'],
+    scripts=['ise-util.py'],
     install_requires=['requests']
 )
