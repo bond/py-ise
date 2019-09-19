@@ -25,6 +25,8 @@ class ISENotFoundError(ISEError):
 
 class API:
 
+  API_MAX_SIZE = 100
+
   def __init__(self, hostname=None, user=None, password=None, debug=False, port=9060, cabundle='/etc/pki/tls/certs/ca-bundle.crt'):
 
     if not hostname: raise ArgumentError('hostname must be provided as argument')
@@ -38,13 +40,20 @@ class API:
     self.debug = debug
     self.cabundle = cabundle
 
-  def uri_for_path(self, path=None, page=1, size=100):
-    return "https://{0}:{1}/ers{2}?size={3}&page={4}".format(
+  def uri_for_path(self, path=None, page=None, size=None):
+    query=[]
+    if page != None: query.append('page={}'.format(page))
+    if size != None: query.append('size={}'.format(size))
+
+    uri = "https://{0}:{1}/ers{2}".format(
       self.hostname,
       self.port,
       path,
       size,
       page)
+
+    if query: uri = uri + "?" + "&".join(query)
+    return uri
 
   def get(self, uri):
     if self.debug: print("Getting api-data from: " + uri)
@@ -69,7 +78,7 @@ class API:
 
     resp = self.get(uri)
     data = json.loads(resp.content)
-    print("Got {} resouces".format(len(data["SearchResult"]["resources"])))
+    if self.debug: print("Got {} resouces".format(len(data["SearchResult"]["resources"])))
 
     # for each resources, get full data from API with new request
     for idx, resource in enumerate(data["SearchResult"]["resources"]):
@@ -87,8 +96,8 @@ class API:
     return self.get_resource(self.uri_for_path('/config/networkdevice/{}'.format(uuid)))
 
   def networkgroups(self, filter=None):
-    return self.get_all_resources(self.uri_for_path('/config/networkdevicegroup'))
+    return self.get_all_resources(self.uri_for_path('/config/networkdevicegroup', size=self.API_MAX_SIZE))
 
   def networkdevices(self, filter=None):
-    return self.get_all_resources(self.uri_for_path('/config/networkdevice'))
+    return self.get_all_resources(self.uri_for_path('/config/networkdevice', size=self.API_MAX_SIZE))
     
